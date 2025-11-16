@@ -8,7 +8,7 @@
         </p>
       </div>
 
-      <v-row>
+      <v-row role="group" aria-label="プリセット時間選択">
         <v-col
           v-for="preset in settings.presets"
           :key="preset"
@@ -24,9 +24,10 @@
             :disabled="state.isRunning"
             @click="handlePresetClick(preset)"
             class="preset-btn"
+            :aria-label="`タイマーを${formatPresetTime(preset)}に設定`"
           >
             <div class="preset-content">
-              <v-icon size="small" class="mb-1">
+              <v-icon size="small" class="mb-1" aria-hidden="true">
                 mdi-clock-outline
               </v-icon>
               <div class="preset-time">

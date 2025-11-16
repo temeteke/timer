@@ -34,6 +34,9 @@ export const useTimers = () => {
   const { notifyTimerComplete } = useNotification()
   const { notifyComplete } = useSound()
 
+  // 履歴管理
+  const { addHistoryEntry } = useTimerHistory()
+
   /**
    * ユニークなIDを生成
    */
@@ -241,6 +244,15 @@ export const useTimers = () => {
    */
   const onTimerComplete = async (timer: Timer) => {
     console.log(`Timer "${timer.label}" completed!`)
+
+    // 履歴に追加
+    addHistoryEntry({
+      label: timer.label,
+      mode: timer.state.mode,
+      duration: timer.state.mode === 'countdown' ? timer.state.totalSeconds : timer.state.remainingSeconds,
+      targetDuration: timer.state.mode === 'countdown' ? timer.state.totalSeconds : undefined,
+      completed: true
+    })
 
     // サウンド＆バイブレーションを再生
     await notifyComplete()

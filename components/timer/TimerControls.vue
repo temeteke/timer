@@ -13,6 +13,7 @@
             @click="handleStart"
             class="control-btn"
             rounded
+            :aria-label="state.isPaused ? 'タイマーを再開' : 'タイマーを開始'"
           >
             <v-icon size="large" class="mr-2">
               {{ state.isPaused ? 'mdi-play' : 'mdi-play' }}
@@ -27,6 +28,7 @@
             @click="handlePause"
             class="control-btn"
             rounded
+            aria-label="タイマーを一時停止"
           >
             <v-icon size="large" class="mr-2">
               mdi-pause
@@ -43,6 +45,7 @@
             class="control-btn"
             rounded
             variant="outlined"
+            aria-label="タイマーをリセット"
           >
             <v-icon size="large" class="mr-2">
               mdi-refresh
@@ -63,12 +66,14 @@
             divided
             class="w-100"
             :disabled="state.isRunning"
+            role="group"
+            aria-label="タイマーモード選択"
           >
-            <v-btn value="countdown" class="flex-grow-1">
+            <v-btn value="countdown" class="flex-grow-1" aria-label="カウントダウンモード">
               <v-icon class="mr-2">mdi-timer-sand</v-icon>
               カウントダウン
             </v-btn>
-            <v-btn value="countup" class="flex-grow-1">
+            <v-btn value="countup" class="flex-grow-1" aria-label="カウントアップモード">
               <v-icon class="mr-2">mdi-timer</v-icon>
               カウントアップ
             </v-btn>
@@ -82,7 +87,7 @@
           <div class="time-setter">
             <div class="d-flex justify-space-between align-center mb-2">
               <span class="text-subtitle-2">時間設定</span>
-              <span class="text-h6 font-weight-bold text-primary">
+              <span class="text-h6 font-weight-bold text-primary" aria-live="polite">
                 {{ formatTime(customTime) }}
               </span>
             </div>
@@ -94,6 +99,7 @@
               thumb-label="always"
               color="primary"
               @update:model-value="handleTimeChange"
+              aria-label="タイマー時間を設定"
             >
               <template #thumb-label="{ modelValue }">
                 {{ Math.floor(modelValue / 60) }}分
