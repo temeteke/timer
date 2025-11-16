@@ -6,11 +6,14 @@
 import type { Timer, TimerState } from '~/types/timer'
 
 export const useTimers = () => {
+  // タイマー番号カウンター（削除されても増加し続ける）
+  const timerCounter = useState<number>('timerCounter', () => 1)
+
   // タイマーのリスト
-  const timers = useState<Timer[]>('timers', () => [
-    {
+  const timers = useState<Timer[]>('timers', () => {
+    const initialTimer = {
       id: generateId(),
-      label: 'タイマー 1',
+      label: `タイマー ${timerCounter.value}`,
       state: {
         mode: 'countdown',
         totalSeconds: 0,
@@ -20,7 +23,9 @@ export const useTimers = () => {
       },
       intervalId: null
     }
-  ])
+    timerCounter.value++
+    return [initialTimer]
+  })
 
   // アクティブなタイマーのインデックス
   const activeTimerIndex = useState<number>('activeTimerIndex', () => 0)
@@ -166,7 +171,7 @@ export const useTimers = () => {
   const addTimer = (label?: string) => {
     const newTimer: Timer = {
       id: generateId(),
-      label: label || `タイマー ${timers.value.length + 1}`,
+      label: label || `タイマー ${timerCounter.value}`,
       state: {
         mode: 'countdown',
         totalSeconds: 0,
@@ -177,6 +182,7 @@ export const useTimers = () => {
       intervalId: null
     }
 
+    timerCounter.value++ // カウンターを増やす
     timers.value.push(newTimer)
     activeTimerIndex.value = timers.value.length - 1
     saveTimers()
@@ -296,6 +302,7 @@ export const useTimers = () => {
 
       localStorage.setItem('timers', JSON.stringify(timersData))
       localStorage.setItem('activeTimerIndex', activeTimerIndex.value.toString())
+      localStorage.setItem('timerCounter', timerCounter.value.toString())
     }
   }
 
@@ -307,6 +314,7 @@ export const useTimers = () => {
       try {
         const savedTimers = localStorage.getItem('timers')
         const savedIndex = localStorage.getItem('activeTimerIndex')
+        const savedCounter = localStorage.getItem('timerCounter')
 
         if (savedTimers) {
           const parsed = JSON.parse(savedTimers)
@@ -327,6 +335,13 @@ export const useTimers = () => {
           const idx = parseInt(savedIndex, 10)
           if (idx >= 0 && idx < timers.value.length) {
             activeTimerIndex.value = idx
+          }
+        }
+
+        if (savedCounter) {
+          const counter = parseInt(savedCounter, 10)
+          if (!isNaN(counter) && counter > 0) {
+            timerCounter.value = counter
           }
         }
       } catch (error) {
