@@ -36,23 +36,6 @@
           </v-btn>
         </v-col>
       </v-row>
-
-      <!-- ポモドーロタイマー（25分）を強調表示 -->
-      <v-row v-if="settings.presets.includes(1500)" class="mt-2">
-        <v-col cols="12">
-          <v-alert
-            color="info"
-            variant="tonal"
-            density="compact"
-            icon="mdi-lightbulb-outline"
-            class="pomodoro-tip"
-          >
-            <div class="text-caption">
-              <strong>ポモドーロテクニック:</strong> 25分集中 → 5分休憩のサイクルで生産性UP
-            </div>
-          </v-alert>
-        </v-col>
-      </v-row>
     </v-card-text>
   </v-card>
 </template>
@@ -96,10 +79,6 @@ const handlePresetClick = (seconds: number) => {
   font-size: 1rem;
   font-weight: 600;
   line-height: 1.2;
-}
-
-.pomodoro-tip {
-  margin-top: 8px;
 }
 
 /* レスポンシブ対応 */
