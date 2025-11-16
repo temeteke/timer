@@ -3,13 +3,7 @@
  * Nuxt 3のuseStateを使用してグローバル状態を管理
  */
 
-export interface TimerState {
-  mode: 'countdown' | 'countup'
-  totalSeconds: number
-  remainingSeconds: number
-  isRunning: boolean
-  isPaused: boolean
-}
+import type { TimerState } from '~/types/timer'
 
 export const useTimer = () => {
   // グローバル状態（useState使用）

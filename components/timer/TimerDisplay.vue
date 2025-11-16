@@ -54,10 +54,21 @@
 </template>
 
 <script setup lang="ts">
-const { state, formattedTime, progress } = useTimer()
+const { activeTimer, getFormattedTime, getProgress } = useTimers()
+
+// アクティブなタイマーの状態
+const state = computed(() => activeTimer.value?.state)
+
+// フォーマットされた時間
+const formattedTime = computed(() => getFormattedTime())
+
+// 進捗率
+const progress = computed(() => getProgress())
 
 // タイマーの色を状態に応じて変更
 const timerColor = computed(() => {
+  if (!state.value) return 'grey'
+
   if (state.value.isRunning) {
     // 残り時間が少なくなったら赤色に
     if (state.value.mode === 'countdown' && state.value.remainingSeconds < 60) {
@@ -73,6 +84,7 @@ const timerColor = computed(() => {
 
 // モード表示ラベル
 const modeLabel = computed(() => {
+  if (!state.value) return ''
   return state.value.mode === 'countdown' ? 'カウントダウン' : 'カウントアップ'
 })
 </script>

@@ -4,12 +4,27 @@
     <v-row justify="center">
       <v-col cols="12">
         <div class="app-header text-center py-4">
-          <h1 class="text-h4 text-md-h3 font-weight-bold">
-            <v-icon size="large" color="primary" class="mr-2">
-              mdi-timer-outline
-            </v-icon>
-            Timer
-          </h1>
+          <div class="header-content">
+            <h1 class="text-h4 text-md-h3 font-weight-bold">
+              <v-icon size="large" color="primary" class="mr-2">
+                mdi-timer-outline
+              </v-icon>
+              Timer
+            </h1>
+            <!-- キーボードショートカットヘルプボタン -->
+            <v-btn
+              icon
+              variant="text"
+              size="small"
+              class="keyboard-help-btn"
+              @click="toggleHelp"
+            >
+              <v-icon>mdi-keyboard</v-icon>
+              <v-tooltip activator="parent" location="bottom">
+                キーボードショートカット (?)
+              </v-tooltip>
+            </v-btn>
+          </div>
           <p class="text-subtitle-1 text-medium-emphasis mt-2">
             シンプルで使いやすいタイマーアプリ
           </p>
@@ -21,6 +36,11 @@
     <v-row justify="center">
       <v-col cols="12" md="10" lg="8" xl="6">
         <v-card elevation="4" class="main-card">
+          <!-- タイマータブ（複数タイマー切り替え） -->
+          <TimerTabs />
+
+          <v-divider class="my-2" />
+
           <!-- タイマー表示 -->
           <TimerDisplay />
 
@@ -62,6 +82,9 @@
         </div>
       </v-col>
     </v-row>
+
+    <!-- キーボードショートカットヘルプダイアログ -->
+    <KeyboardShortcutsHelp />
   </v-container>
 </template>
 
@@ -75,16 +98,21 @@ useHead({
   meta: [
     {
       name: 'description',
-      content: 'Nuxt 3とVuetify 3で作られたシンプルで使いやすいタイマーアプリケーション。カウントダウン、カウントアップに対応。'
+      content: 'Nuxt 3とVuetify 3で作られたシンプルで使いやすいタイマーアプリケーション。カウントダウン、カウントアップ、複数タイマー管理に対応。'
     }
   ]
 })
 
-// 設定を読み込み
+// 設定とタイマーを読み込み
 const { loadSettings } = useTimerSettings()
+const { loadTimers } = useTimers()
+
+// キーボードショートカットを有効化
+const { toggleHelp } = useKeyboardShortcuts()
 
 onMounted(() => {
   loadSettings()
+  loadTimers()
 })
 </script>
 
@@ -98,6 +126,23 @@ onMounted(() => {
 
 .app-header {
   margin-bottom: 20px;
+  position: relative;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.keyboard-help-btn {
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.keyboard-help-btn:hover {
+  opacity: 1;
 }
 
 .main-card {

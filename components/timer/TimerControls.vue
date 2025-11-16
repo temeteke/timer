@@ -107,10 +107,13 @@
 </template>
 
 <script setup lang="ts">
-const { state, start, pause, reset, setTime, setMode, formatTime } = useTimer()
+const { activeTimer, start, pause, reset, setTime, setMode, formatTime } = useTimers()
+
+// アクティブなタイマーの状態
+const state = computed(() => activeTimer.value?.state)
 
 // カスタム時間設定用
-const customTime = ref(state.value.totalSeconds || 300)
+const customTime = ref(state.value?.totalSeconds || 300)
 
 // 開始ボタン
 const handleStart = () => {
@@ -142,14 +145,14 @@ const handleTimeChange = (value: number) => {
 
 // 初期時間設定
 onMounted(() => {
-  if (state.value.mode === 'countdown' && state.value.totalSeconds === 0) {
+  if (state.value && state.value.mode === 'countdown' && state.value.totalSeconds === 0) {
     setTime(customTime.value)
   }
 })
 
 // タイマー状態が変わったらカスタム時間を更新
-watch(() => state.value.totalSeconds, (newVal) => {
-  if (newVal > 0 && !state.value.isRunning) {
+watch(() => state.value?.totalSeconds, (newVal) => {
+  if (newVal && newVal > 0 && state.value && !state.value.isRunning) {
     customTime.value = newVal
   }
 })
