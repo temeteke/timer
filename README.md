@@ -20,7 +20,7 @@ Nuxt 3 + Vuetify 3で構築されたモダンなPWA（Progressive Web App）対�
 
 ## デモ
 
-（GitHub Pagesデプロイ後にURLを追加）
+https://temeteke.github.io/timer/
 
 ## 技術スタック
 
@@ -42,7 +42,7 @@ Nuxt 3 + Vuetify 3で構築されたモダンなPWA（Progressive Web App）対�
 
 ```bash
 # リポジトリをクローン
-git clone https://github.com/[username]/timer.git
+git clone https://github.com/temeteke/timer.git
 cd timer
 
 # 依存関係をインストール
@@ -78,7 +78,7 @@ GitHub Pagesへのデプロイ手順は [DEPLOY.md](./DEPLOY.md) を参照して
 
 1. `main` ブランチにプッシュ
 2. GitHub Actionsが自動的にビルド＆デプロイ
-3. `https://[username].github.io/timer/` でアクセス可能
+3. `https://temeteke.github.io/timer/` でアクセス可能
 
 ## プロジェクト構造
 
