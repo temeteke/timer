@@ -12,19 +12,6 @@
               Timer
             </h1>
             <div class="header-actions">
-              <!-- ビュー切り替えボタン -->
-              <v-btn
-                icon
-                variant="text"
-                size="small"
-                class="view-toggle-btn"
-                @click="toggleView"
-              >
-                <v-icon>{{ viewMode === 'tabs' ? 'mdi-view-grid' : 'mdi-tab' }}</v-icon>
-                <v-tooltip activator="parent" location="bottom">
-                  {{ viewMode === 'tabs' ? 'グリッドビュー' : 'タブビュー' }}
-                </v-tooltip>
-              </v-btn>
               <!-- テーマ切り替えボタン -->
               <ThemeToggle />
               <!-- キーボードショートカットヘルプボタン -->
@@ -51,60 +38,27 @@
 
     <!-- メインコンテンツ -->
     <v-row justify="center">
-      <v-col cols="12" :md="viewMode === 'grid' ? 12 : 10" :lg="viewMode === 'grid' ? 10 : 8" :xl="viewMode === 'grid' ? 8 : 6">
-        <!-- グリッドビュー -->
-        <div v-if="viewMode === 'grid'">
-          <TimerGridView />
-
-          <!-- 設定と履歴（グリッドビュー時） -->
-          <v-card elevation="4" class="main-card mt-6">
-            <v-expansion-panels variant="accordion">
-              <v-expansion-panel>
-                <v-expansion-panel-title>
-                  <v-icon class="mr-2">mdi-cog</v-icon>
-                  設定
-                </v-expansion-panel-title>
-                <v-expansion-panel-text>
-                  <SettingsPanel />
-                </v-expansion-panel-text>
-              </v-expansion-panel>
-
-              <v-expansion-panel>
-                <v-expansion-panel-title>
-                  <v-icon class="mr-2">mdi-history</v-icon>
-                  履歴
-                </v-expansion-panel-title>
-                <v-expansion-panel-text>
-                  <TimerHistory />
-                </v-expansion-panel-text>
-              </v-expansion-panel>
-            </v-expansion-panels>
-          </v-card>
-        </div>
-
-        <!-- タブビュー -->
-        <v-card v-else elevation="4" class="main-card">
-          <!-- タイマータブ（複数タイマー切り替え） -->
-          <TimerTabs />
-
-          <v-divider class="my-2" />
-
+      <v-col cols="12" md="10" lg="8" xl="6">
+        <!-- メインタイマーカード -->
+        <v-card elevation="4" class="main-card mb-6">
           <!-- タイマー表示 -->
           <TimerDisplay />
 
-          <v-divider class="my-4" />
+          <v-divider class="my-2" />
 
           <!-- タイマーコントロール -->
           <TimerControls />
+        </v-card>
 
-          <v-divider class="my-6" />
+        <!-- プリセットカード -->
+        <v-card elevation="4" class="main-card mb-6">
+          <v-card-text class="pa-4">
+            <TimerPresets />
+          </v-card-text>
+        </v-card>
 
-          <!-- プリセット -->
-          <TimerPresets />
-
-          <v-divider class="my-6" />
-
-          <!-- 設定と履歴（展開可能） -->
+        <!-- 設定と履歴 -->
+        <v-card elevation="4" class="main-card">
           <v-expansion-panels variant="accordion">
             <v-expansion-panel>
               <v-expansion-panel-title>
@@ -148,7 +102,7 @@
 
 <script setup lang="ts">
 // メインページ
-// タイマーコンポーネントを統合
+// 単一タイマー用のシンプルなレイアウト
 
 // ページメタデータ
 useHead({
@@ -156,14 +110,14 @@ useHead({
   meta: [
     {
       name: 'description',
-      content: 'Nuxt 3とVuetify 3で作られたシンプルで使いやすいタイマーアプリケーション。カウントダウン、カウントアップ、複数タイマー管理に対応。'
+      content: 'Nuxt 3とVuetify 3で作られたシンプルで使いやすいタイマーアプリケーション。カウントダウン、カウントアップに対応。'
     }
   ]
 })
 
 // 設定とタイマーを読み込み
 const { loadSettings } = useTimerSettings()
-const { loadTimers } = useTimers()
+const { loadTimer } = useTimers()
 
 // テーマ管理
 const { initTheme } = useTheme()
@@ -174,17 +128,9 @@ const { loadHistory } = useTimerHistory()
 // キーボードショートカットを有効化
 const { toggleHelp } = useKeyboardShortcuts()
 
-// ビューモード管理
-const { viewMode, toggleViewMode } = useTimerView()
-
-// ビュー切り替え
-const toggleView = () => {
-  toggleViewMode()
-}
-
 onMounted(() => {
   loadSettings()
-  loadTimers()
+  loadTimer()
   loadHistory()
   initTheme()
 })
@@ -214,15 +160,6 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 4px;
-}
-
-.view-toggle-btn {
-  opacity: 0.7;
-  transition: opacity 0.2s;
-}
-
-.view-toggle-btn:hover {
-  opacity: 1;
 }
 
 .keyboard-help-btn {

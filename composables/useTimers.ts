@@ -1,34 +1,23 @@
 /**
- * 複数タイマーの管理を行うComposable
- * 各タイマーに独立した状態とIDを持たせる
+ * 単一タイマーの管理を行うComposable
  */
 
 import type { Timer, TimerState } from '~/types/timer'
 
 export const useTimers = () => {
-  // タイマー番号カウンター（削除されても増加し続ける）
-  const timerCounter = useState<number>('timerCounter', () => 1)
-
-  // タイマーのリスト
-  const timers = useState<Timer[]>('timers', () => {
-    const initialTimer = {
-      id: generateId(),
-      label: `タイマー ${timerCounter.value}`,
-      state: {
-        mode: 'countdown',
-        totalSeconds: 0,
-        remainingSeconds: 0,
-        isRunning: false,
-        isPaused: false
-      },
-      intervalId: null
-    }
-    timerCounter.value++
-    return [initialTimer]
-  })
-
-  // アクティブなタイマーのインデックス
-  const activeTimerIndex = useState<number>('activeTimerIndex', () => 0)
+  // 単一タイマーの状態
+  const timer = useState<Timer>('timer', () => ({
+    id: generateId(),
+    label: 'タイマー',
+    state: {
+      mode: 'countdown',
+      totalSeconds: 0,
+      remainingSeconds: 0,
+      isRunning: false,
+      isPaused: false
+    },
+    intervalId: null
+  }))
 
   // 通知とサウンドのcomposableを使用
   const { notifyTimerComplete } = useNotification()
@@ -45,212 +34,127 @@ export const useTimers = () => {
   }
 
   /**
-   * アクティブなタイマーを取得
+   * アクティブなタイマーを取得（後方互換性のため）
    */
-  const activeTimer = computed(() => {
-    return timers.value[activeTimerIndex.value]
-  })
+  const activeTimer = computed(() => timer.value)
 
   /**
-   * 指定したインデックスのタイマーを開始
+   * タイマーを開始
    */
-  const start = (index?: number) => {
-    const idx = index !== undefined ? index : activeTimerIndex.value
-    const timer = timers.value[idx]
-    if (!timer || timer.state.isRunning) return
+  const start = () => {
+    if (!timer.value || timer.value.state.isRunning) return
 
-    timer.state.isRunning = true
-    timer.state.isPaused = false
+    timer.value.state.isRunning = true
+    timer.value.state.isPaused = false
 
     if (process.client) {
-      timer.intervalId = setInterval(() => {
-        if (timer.state.mode === 'countdown') {
-          if (timer.state.remainingSeconds > 0) {
-            timer.state.remainingSeconds--
+      timer.value.intervalId = setInterval(() => {
+        if (timer.value.state.mode === 'countdown') {
+          if (timer.value.state.remainingSeconds > 0) {
+            timer.value.state.remainingSeconds--
           } else {
             // タイマー終了
-            stop(idx)
-            onTimerComplete(timer)
+            stop()
+            onTimerComplete(timer.value)
           }
         } else {
           // カウントアップモード
-          timer.state.remainingSeconds++
+          timer.value.state.remainingSeconds++
         }
       }, 1000)
     }
   }
 
   /**
-   * 指定したインデックスのタイマーを一時停止
+   * タイマーを一時停止
    */
-  const pause = (index?: number) => {
-    const idx = index !== undefined ? index : activeTimerIndex.value
-    const timer = timers.value[idx]
-    if (!timer) return
+  const pause = () => {
+    if (!timer.value) return
 
-    if (timer.intervalId) {
-      clearInterval(timer.intervalId)
-      timer.intervalId = null
+    if (timer.value.intervalId) {
+      clearInterval(timer.value.intervalId)
+      timer.value.intervalId = null
     }
-    timer.state.isRunning = false
-    timer.state.isPaused = true
+    timer.value.state.isRunning = false
+    timer.value.state.isPaused = true
   }
 
   /**
-   * 指定したインデックスのタイマーをリセット
+   * タイマーをリセット
    */
-  const reset = (index?: number) => {
-    const idx = index !== undefined ? index : activeTimerIndex.value
-    const timer = timers.value[idx]
-    if (!timer) return
+  const reset = () => {
+    if (!timer.value) return
 
-    if (timer.intervalId) {
-      clearInterval(timer.intervalId)
-      timer.intervalId = null
+    if (timer.value.intervalId) {
+      clearInterval(timer.value.intervalId)
+      timer.value.intervalId = null
     }
-    timer.state.isRunning = false
-    timer.state.isPaused = false
-    timer.state.remainingSeconds = timer.state.totalSeconds
+    timer.value.state.isRunning = false
+    timer.value.state.isPaused = false
+    timer.value.state.remainingSeconds = timer.value.state.totalSeconds
   }
 
   /**
-   * 指定したインデックスのタイマーを停止
+   * タイマーを停止
    */
-  const stop = (index?: number) => {
-    const idx = index !== undefined ? index : activeTimerIndex.value
-    const timer = timers.value[idx]
-    if (!timer) return
+  const stop = () => {
+    if (!timer.value) return
 
-    if (timer.intervalId) {
-      clearInterval(timer.intervalId)
-      timer.intervalId = null
+    if (timer.value.intervalId) {
+      clearInterval(timer.value.intervalId)
+      timer.value.intervalId = null
     }
-    timer.state.isRunning = false
-    timer.state.isPaused = false
+    timer.value.state.isRunning = false
+    timer.value.state.isPaused = false
   }
 
   /**
    * タイマー時間を設定
    */
-  const setTime = (seconds: number, index?: number) => {
-    const idx = index !== undefined ? index : activeTimerIndex.value
-    const timer = timers.value[idx]
-    if (!timer || timer.state.isRunning) return
+  const setTime = (seconds: number) => {
+    if (!timer.value || timer.value.state.isRunning) return
 
-    timer.state.totalSeconds = seconds
-    timer.state.remainingSeconds = seconds
+    timer.value.state.totalSeconds = seconds
+    timer.value.state.remainingSeconds = seconds
+    saveTimer()
   }
 
   /**
    * モードを変更
    */
-  const setMode = (mode: 'countdown' | 'countup', index?: number) => {
-    const idx = index !== undefined ? index : activeTimerIndex.value
-    const timer = timers.value[idx]
-    if (!timer || timer.state.isRunning) return
+  const setMode = (mode: 'countdown' | 'countup') => {
+    if (!timer.value || timer.value.state.isRunning) return
 
-    timer.state.mode = mode
+    timer.value.state.mode = mode
     if (mode === 'countup') {
-      timer.state.totalSeconds = 0
-      timer.state.remainingSeconds = 0
+      timer.value.state.totalSeconds = 0
+      timer.value.state.remainingSeconds = 0
     }
+    saveTimer()
   }
 
   /**
    * タイマーのラベルを設定
    */
-  const setLabel = (label: string, index?: number) => {
-    const idx = index !== undefined ? index : activeTimerIndex.value
-    const timer = timers.value[idx]
-    if (!timer) return
+  const setLabel = (label: string) => {
+    if (!timer.value) return
 
-    timer.label = label
-    saveTimers()
-  }
-
-  /**
-   * 新しいタイマーを追加
-   */
-  const addTimer = (label?: string) => {
-    const newTimer: Timer = {
-      id: generateId(),
-      label: label || `タイマー ${timerCounter.value}`,
-      state: {
-        mode: 'countdown',
-        totalSeconds: 0,
-        remainingSeconds: 0,
-        isRunning: false,
-        isPaused: false
-      },
-      intervalId: null
-    }
-
-    timerCounter.value++ // カウンターを増やす
-    timers.value.push(newTimer)
-    activeTimerIndex.value = timers.value.length - 1
-    saveTimers()
-    return newTimer.id
-  }
-
-  /**
-   * タイマーを削除
-   */
-  const removeTimer = (index: number) => {
-    if (timers.value.length <= 1) {
-      // 最後のタイマーは削除できない
-      return
-    }
-
-    const timer = timers.value[index]
-    if (timer?.intervalId) {
-      clearInterval(timer.intervalId)
-    }
-
-    timers.value.splice(index, 1)
-
-    // アクティブインデックスを調整
-    if (activeTimerIndex.value >= timers.value.length) {
-      activeTimerIndex.value = timers.value.length - 1
-    }
-
-    saveTimers()
-  }
-
-  /**
-   * アクティブなタイマーを切り替え
-   */
-  const switchTimer = (index: number) => {
-    if (index >= 0 && index < timers.value.length) {
-      activeTimerIndex.value = index
-    }
-  }
-
-  /**
-   * 次のタイマーに切り替え
-   */
-  const nextTimer = () => {
-    activeTimerIndex.value = (activeTimerIndex.value + 1) % timers.value.length
-  }
-
-  /**
-   * 前のタイマーに切り替え
-   */
-  const prevTimer = () => {
-    activeTimerIndex.value = (activeTimerIndex.value - 1 + timers.value.length) % timers.value.length
+    timer.value.label = label
+    saveTimer()
   }
 
   /**
    * タイマー完了時のコールバック
    */
-  const onTimerComplete = async (timer: Timer) => {
-    console.log(`Timer "${timer.label}" completed!`)
+  const onTimerComplete = async (completedTimer: Timer) => {
+    console.log(`Timer "${completedTimer.label}" completed!`)
 
     // 履歴に追加
     addHistoryEntry({
-      label: timer.label,
-      mode: timer.state.mode,
-      duration: timer.state.mode === 'countdown' ? timer.state.totalSeconds : timer.state.remainingSeconds,
-      targetDuration: timer.state.mode === 'countdown' ? timer.state.totalSeconds : undefined,
+      label: completedTimer.label,
+      mode: completedTimer.state.mode,
+      duration: completedTimer.state.mode === 'countdown' ? completedTimer.state.totalSeconds : completedTimer.state.remainingSeconds,
+      targetDuration: completedTimer.state.mode === 'countdown' ? completedTimer.state.totalSeconds : undefined,
       completed: true
     })
 
@@ -258,7 +162,7 @@ export const useTimers = () => {
     await notifyComplete()
 
     // ブラウザ通知を送信
-    notifyTimerComplete(`${timer.label}が完了しました！`)
+    notifyTimerComplete(`${completedTimer.label}が完了しました！`)
   }
 
   /**
@@ -278,13 +182,11 @@ export const useTimers = () => {
   /**
    * 進捗率を計算（0-100）
    */
-  const getProgress = (index?: number): number => {
-    const idx = index !== undefined ? index : activeTimerIndex.value
-    const timer = timers.value[idx]
-    if (!timer) return 0
+  const getProgress = (): number => {
+    if (!timer.value) return 0
 
-    if (timer.state.mode === 'countdown' && timer.state.totalSeconds > 0) {
-      return ((timer.state.totalSeconds - timer.state.remainingSeconds) / timer.state.totalSeconds) * 100
+    if (timer.value.state.mode === 'countdown' && timer.value.state.totalSeconds > 0) {
+      return ((timer.value.state.totalSeconds - timer.value.state.remainingSeconds) / timer.value.state.totalSeconds) * 100
     }
     return 0
   }
@@ -292,86 +194,62 @@ export const useTimers = () => {
   /**
    * フォーマットされた時間文字列
    */
-  const getFormattedTime = (index?: number): string => {
-    const idx = index !== undefined ? index : activeTimerIndex.value
-    const timer = timers.value[idx]
-    if (!timer) return '00:00'
+  const getFormattedTime = (): string => {
+    if (!timer.value) return '00:00'
 
-    return formatTime(timer.state.remainingSeconds)
+    return formatTime(timer.value.state.remainingSeconds)
   }
 
   /**
    * タイマーをLocalStorageに保存
    */
-  const saveTimers = () => {
+  const saveTimer = () => {
     if (process.client) {
-      const timersData = timers.value.map(timer => ({
-        id: timer.id,
-        label: timer.label,
-        state: timer.state
+      const timerData = {
+        id: timer.value.id,
+        label: timer.value.label,
+        state: timer.value.state
         // intervalIdは保存しない
-      }))
+      }
 
-      localStorage.setItem('timers', JSON.stringify(timersData))
-      localStorage.setItem('activeTimerIndex', activeTimerIndex.value.toString())
-      localStorage.setItem('timerCounter', timerCounter.value.toString())
+      localStorage.setItem('timer', JSON.stringify(timerData))
     }
   }
 
   /**
    * LocalStorageからタイマーを読み込み
    */
-  const loadTimers = () => {
+  const loadTimer = () => {
     if (process.client) {
       try {
-        const savedTimers = localStorage.getItem('timers')
-        const savedIndex = localStorage.getItem('activeTimerIndex')
-        const savedCounter = localStorage.getItem('timerCounter')
+        const savedTimer = localStorage.getItem('timer')
 
-        if (savedTimers) {
-          const parsed = JSON.parse(savedTimers)
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            timers.value = parsed.map(t => ({
-              ...t,
-              intervalId: null,
-              state: {
-                ...t.state,
-                isRunning: false,
-                isPaused: false
-              }
-            }))
-          }
-        }
-
-        if (savedIndex) {
-          const idx = parseInt(savedIndex, 10)
-          if (idx >= 0 && idx < timers.value.length) {
-            activeTimerIndex.value = idx
-          }
-        }
-
-        if (savedCounter) {
-          const counter = parseInt(savedCounter, 10)
-          if (!isNaN(counter) && counter > 0) {
-            timerCounter.value = counter
+        if (savedTimer) {
+          const parsed = JSON.parse(savedTimer)
+          timer.value = {
+            ...parsed,
+            intervalId: null,
+            state: {
+              ...parsed.state,
+              isRunning: false,
+              isPaused: false
+            }
           }
         }
       } catch (error) {
-        console.error('Failed to load timers from localStorage:', error)
+        console.error('Failed to load timer from localStorage:', error)
       }
     }
   }
 
   /**
-   * すべてのタイマーを停止してクリーンアップ
+   * タイマーを停止してクリーンアップ
    */
   const cleanup = () => {
-    timers.value.forEach(timer => {
-      if (timer.intervalId) {
-        clearInterval(timer.intervalId)
-        timer.intervalId = null
-      }
-    })
+    if (timer.value?.intervalId) {
+      clearInterval(timer.value.intervalId)
+      timer.value.intervalId = null
+    }
   }
 
   // コンポーネントがアンマウントされた時のクリーンアップ
@@ -381,9 +259,11 @@ export const useTimers = () => {
     })
   }
 
+  // 後方互換性のために loadTimers も提供
+  const loadTimers = loadTimer
+
   return {
-    timers: readonly(timers),
-    activeTimerIndex: readonly(activeTimerIndex),
+    timer: readonly(timer),
     activeTimer,
     start,
     pause,
@@ -392,15 +272,11 @@ export const useTimers = () => {
     setTime,
     setMode,
     setLabel,
-    addTimer,
-    removeTimer,
-    switchTimer,
-    nextTimer,
-    prevTimer,
     formatTime,
     getFormattedTime,
     getProgress,
-    saveTimers,
+    saveTimer,
+    loadTimer,
     loadTimers,
     cleanup
   }
