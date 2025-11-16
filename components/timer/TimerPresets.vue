@@ -41,8 +41,11 @@
 </template>
 
 <script setup lang="ts">
-const { state, setTime, setMode } = useTimer()
+const { activeTimer, setTime, setMode } = useTimers()
 const { settings, formatPresetTime } = useTimerSettings()
+
+// アクティブなタイマーの状態
+const state = computed(() => activeTimer.value?.state)
 
 const handlePresetClick = (seconds: number) => {
   // カウントダウンモードに設定

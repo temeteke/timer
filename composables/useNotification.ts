@@ -89,9 +89,9 @@ export const useNotification = () => {
   /**
    * タイマー完了通知を送信
    */
-  const notifyTimerComplete = () => {
+  const notifyTimerComplete = (message?: string) => {
     sendNotification('タイマー終了！', {
-      body: '設定した時間が経過しました。',
+      body: message || '設定した時間が経過しました。',
       icon: '/timer/icon-192x192.png'
     })
   }
