@@ -6,7 +6,7 @@ export default defineNuxtConfig({
     baseURL: '/timer/', // GitHub Pagesのリポジトリ名に合わせる
     buildAssetsDir: 'assets',
     head: {
-      title: 'Timer App',
+      title: 'Timer',
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
@@ -37,7 +37,7 @@ export default defineNuxtConfig({
   pwa: {
     registerType: 'autoUpdate',
     manifest: {
-      name: 'Timer App',
+      name: 'Timer',
       short_name: 'Timer',
       description: 'A simple and elegant timer application',
       theme_color: '#1976D2',
