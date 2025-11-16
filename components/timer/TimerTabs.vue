@@ -151,8 +151,7 @@ const executeDelete = () => {
 
 // タイマー追加
 const handleAddTimer = () => {
-  const label = `タイマー ${timers.value.length + 1}`
-  addTimer(label)
+  addTimer() // timerCounterを使用するためにlabelパラメータを渡さない
 }
 </script>
 
