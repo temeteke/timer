@@ -1,0 +1,6 @@
+PLACEHOLDER: Generate from icon.svg
+This file should be a 192x192 PNG version of icon.svg
+Use an online converter like:
+- https://cloudconvert.com/svg-to-png
+- https://svgtopng.com/
+Or use ImageMagick: convert -background none -size 192x192 icon.svg icon-192x192.png

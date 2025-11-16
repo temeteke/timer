@@ -13,7 +13,8 @@ export default defineNuxtConfig({
         { name: 'description', content: 'A simple and elegant timer application' }
       ],
       link: [
-        { rel: 'icon', type: 'image/x-icon', href: '/timer/favicon.ico' }
+        { rel: 'icon', type: 'image/svg+xml', href: '/timer/favicon.svg' },
+        { rel: 'apple-touch-icon', sizes: '180x180', href: '/timer/icon-192x192.png' }
       ]
     }
   },
