@@ -8,7 +8,7 @@
             <v-icon size="large" color="primary" class="mr-2">
               mdi-timer-outline
             </v-icon>
-            Timer App
+            Timer
           </h1>
           <p class="text-subtitle-1 text-medium-emphasis mt-2">
             シンプルで使いやすいタイマーアプリ
@@ -71,7 +71,7 @@
 
 // ページメタデータ
 useHead({
-  title: 'Timer App - シンプルなタイマー',
+  title: 'Timer - シンプルなタイマー',
   meta: [
     {
       name: 'description',
