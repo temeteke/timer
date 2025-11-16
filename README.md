@@ -62,22 +62,12 @@ npm run dev
 # プロダクションビルド
 npm run build
 
-# 静的サイト生成（GitHub Pages用）
+# 静的サイト生成
 npm run generate
 
 # ビルド後のプレビュー
 npm run preview
 ```
-
-## デプロイ
-
-GitHub Pagesへのデプロイ手順は [DEPLOY.md](./DEPLOY.md) を参照してください。
-
-### クイックデプロイ
-
-1. `main` ブランチにプッシュ
-2. GitHub Actionsが自動的にビルド＆デプロイ
-3. `https://temeteke.github.io/timer/` でアクセス可能
 
 ## プロジェクト構造
 
