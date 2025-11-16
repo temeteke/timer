@@ -8,7 +8,6 @@ export interface TimerSettings {
   soundEnabled: boolean
   vibrationEnabled: boolean
   darkMode: boolean
-  selectedSound: string
 }
 
 export const useTimerSettings = () => {
@@ -16,8 +15,7 @@ export const useTimerSettings = () => {
     presets: [60, 180, 300, 600], // 1分, 3分, 5分, 10分
     soundEnabled: true,
     vibrationEnabled: true,
-    darkMode: false,
-    selectedSound: 'default'
+    darkMode: false
   }))
 
   /**

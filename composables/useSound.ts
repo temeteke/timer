@@ -6,8 +6,7 @@
 export const useSound = () => {
   const { settings } = useTimerSettings()
 
-  // オーディオインスタンス
-  let audio: HTMLAudioElement | null = null
+  // オーディオコンテキスト
   let audioContext: AudioContext | null = null
 
   /**
@@ -64,21 +63,6 @@ export const useSound = () => {
   }
 
   /**
-   * サウンドファイルを読み込み
-   */
-  const loadSound = (soundName: string = 'default') => {
-    if (!process.client) return
-
-    try {
-      const soundPath = `/timer/sounds/${soundName}.mp3`
-      audio = new Audio(soundPath)
-      audio.load()
-    } catch (error) {
-      console.error('Failed to load sound:', error)
-    }
-  }
-
-  /**
    * サウンドを再生
    */
   const playSound = async () => {
@@ -87,38 +71,10 @@ export const useSound = () => {
     // サウンドが無効の場合は再生しない
     if (!settings.value.soundEnabled) return
 
-    try {
-      // オーディオが未ロードの場合は読み込み
-      if (!audio) {
-        loadSound(settings.value.selectedSound)
-      }
-
-      if (audio) {
-        // 既に再生中の場合は停止してリセット
-        audio.pause()
-        audio.currentTime = 0
-
-        // 再生を試みる
-        await audio.play()
-      }
-    } catch (error) {
-      // サウンドファイルの再生に失敗した場合はビープ音を再生
-      console.warn('Sound file not available, playing beep instead')
-      await playBeep()
-    }
+    // ビープ音を再生
+    await playBeep()
   }
 
-  /**
-   * サウンドを停止
-   */
-  const stopSound = () => {
-    if (!process.client) return
-
-    if (audio) {
-      audio.pause()
-      audio.currentTime = 0
-    }
-  }
 
   /**
    * バイブレーションを実行
@@ -148,27 +104,9 @@ export const useSound = () => {
     vibrate()
   }
 
-  /**
-   * サウンドを変更
-   */
-  const changeSound = (soundName: string) => {
-    loadSound(soundName)
-  }
-
-  // コンポーネントアンマウント時にクリーンアップ
-  if (process.client) {
-    onBeforeUnmount(() => {
-      stopSound()
-      audio = null
-    })
-  }
-
   return {
     playSound,
-    stopSound,
     vibrate,
-    notifyComplete,
-    changeSound,
-    loadSound
+    notifyComplete
   }
 }
