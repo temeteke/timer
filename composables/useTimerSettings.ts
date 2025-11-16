@@ -13,7 +13,7 @@ export interface TimerSettings {
 
 export const useTimerSettings = () => {
   const settings = useState<TimerSettings>('timerSettings', () => ({
-    presets: [60, 180, 300, 600, 1500], // 1分, 3分, 5分, 10分, 25分
+    presets: [60, 180, 300, 600], // 1分, 3分, 5分, 10分
     soundEnabled: true,
     vibrationEnabled: true,
     darkMode: false,
