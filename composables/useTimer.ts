@@ -21,6 +21,10 @@ export const useTimer = () => {
     isPaused: false
   }))
 
+  // 通知とサウンドのcomposableを使用
+  const { notifyTimerComplete } = useNotification()
+  const { notifyComplete } = useSound()
+
   // インターバルIDを管理（ブラウザ側のみ）
   let intervalId: ReturnType<typeof setInterval> | null = null
 
@@ -116,10 +120,15 @@ export const useTimer = () => {
   /**
    * タイマー完了時のコールバック
    */
-  const onTimerComplete = () => {
+  const onTimerComplete = async () => {
     // 完了時の処理（通知、サウンドなど）
     console.log('Timer completed!')
-    // TODO: 通知・サウンド機能を後で実装
+
+    // サウンド＆バイブレーションを再生
+    await notifyComplete()
+
+    // ブラウザ通知を送信
+    notifyTimerComplete()
   }
 
   /**

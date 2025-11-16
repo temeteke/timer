@@ -33,6 +33,21 @@
 
           <!-- プリセット -->
           <TimerPresets />
+
+          <v-divider class="my-6" />
+
+          <!-- 設定（展開可能） -->
+          <v-expansion-panels variant="accordion">
+            <v-expansion-panel>
+              <v-expansion-panel-title>
+                <v-icon class="mr-2">mdi-cog</v-icon>
+                設定
+              </v-expansion-panel-title>
+              <v-expansion-panel-text>
+                <SettingsPanel />
+              </v-expansion-panel-text>
+            </v-expansion-panel>
+          </v-expansion-panels>
         </v-card>
       </v-col>
     </v-row>
