@@ -10,11 +10,13 @@ export default defineNuxtConfig({
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-        { name: 'description', content: 'A simple and elegant timer application' }
+        { name: 'description', content: 'A simple and elegant timer application' },
+        { name: 'theme-color', content: '#1976D2' }
       ],
       link: [
         { rel: 'icon', type: 'image/svg+xml', href: '/timer/favicon.svg' },
-        { rel: 'apple-touch-icon', sizes: '180x180', href: '/timer/icon-192x192.png' }
+        { rel: 'apple-touch-icon', sizes: '180x180', href: '/timer/icon-192x192.png' },
+        { rel: 'manifest', href: '/timer/manifest.webmanifest' }
       ]
     }
   },
