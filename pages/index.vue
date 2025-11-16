@@ -12,6 +12,19 @@
               Timer
             </h1>
             <div class="header-actions">
+              <!-- ビュー切り替えボタン -->
+              <v-btn
+                icon
+                variant="text"
+                size="small"
+                class="view-toggle-btn"
+                @click="toggleView"
+              >
+                <v-icon>{{ viewMode === 'tabs' ? 'mdi-view-grid' : 'mdi-tab' }}</v-icon>
+                <v-tooltip activator="parent" location="bottom">
+                  {{ viewMode === 'tabs' ? 'グリッドビュー' : 'タブビュー' }}
+                </v-tooltip>
+              </v-btn>
               <!-- テーマ切り替えボタン -->
               <ThemeToggle />
               <!-- キーボードショートカットヘルプボタン -->
@@ -38,8 +51,39 @@
 
     <!-- メインコンテンツ -->
     <v-row justify="center">
-      <v-col cols="12" md="10" lg="8" xl="6">
-        <v-card elevation="4" class="main-card">
+      <v-col cols="12" :md="viewMode === 'grid' ? 12 : 10" :lg="viewMode === 'grid' ? 10 : 8" :xl="viewMode === 'grid' ? 8 : 6">
+        <!-- グリッドビュー -->
+        <div v-if="viewMode === 'grid'">
+          <TimerGridView />
+
+          <!-- 設定と履歴（グリッドビュー時） -->
+          <v-card elevation="4" class="main-card mt-6">
+            <v-expansion-panels variant="accordion">
+              <v-expansion-panel>
+                <v-expansion-panel-title>
+                  <v-icon class="mr-2">mdi-cog</v-icon>
+                  設定
+                </v-expansion-panel-title>
+                <v-expansion-panel-text>
+                  <SettingsPanel />
+                </v-expansion-panel-text>
+              </v-expansion-panel>
+
+              <v-expansion-panel>
+                <v-expansion-panel-title>
+                  <v-icon class="mr-2">mdi-history</v-icon>
+                  履歴
+                </v-expansion-panel-title>
+                <v-expansion-panel-text>
+                  <TimerHistory />
+                </v-expansion-panel-text>
+              </v-expansion-panel>
+            </v-expansion-panels>
+          </v-card>
+        </div>
+
+        <!-- タブビュー -->
+        <v-card v-else elevation="4" class="main-card">
           <!-- タイマータブ（複数タイマー切り替え） -->
           <TimerTabs />
 
@@ -130,6 +174,14 @@ const { loadHistory } = useTimerHistory()
 // キーボードショートカットを有効化
 const { toggleHelp } = useKeyboardShortcuts()
 
+// ビューモード管理
+const { viewMode, toggleViewMode } = useTimerView()
+
+// ビュー切り替え
+const toggleView = () => {
+  toggleViewMode()
+}
+
 onMounted(() => {
   loadSettings()
   loadTimers()
@@ -162,6 +214,15 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 4px;
+}
+
+.view-toggle-btn {
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.view-toggle-btn:hover {
+  opacity: 1;
 }
 
 .keyboard-help-btn {
