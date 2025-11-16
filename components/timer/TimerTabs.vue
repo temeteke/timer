@@ -7,17 +7,22 @@
       align-tabs="start"
       show-arrows
       density="comfortable"
+      role="tablist"
+      aria-label="タイマー切り替え"
     >
       <v-tab
         v-for="(timer, index) in timers"
         :key="timer.id"
         :value="index"
         class="timer-tab"
+        role="tab"
+        :aria-label="`${timer.label}${timer.state.isRunning ? ' 実行中' : ''}`"
+        :aria-selected="activeIndex === index"
       >
         <div class="tab-content">
           <!-- タイマーラベル -->
           <div class="tab-label">
-            <v-icon size="small" class="mr-1">
+            <v-icon size="small" class="mr-1" aria-hidden="true">
               {{ timer.state.isRunning ? 'mdi-timer' : 'mdi-timer-outline' }}
             </v-icon>
             <span>{{ timer.label }}</span>
@@ -30,6 +35,7 @@
             color="success"
             variant="flat"
             class="ml-2"
+            aria-label="実行中"
           >
             実行中
           </v-chip>
@@ -42,15 +48,20 @@
             variant="text"
             class="ml-2 delete-btn"
             @click.stop="confirmDelete(index)"
+            :aria-label="`${timer.label}を削除`"
           >
-            <v-icon size="small">mdi-close</v-icon>
+            <v-icon size="small" aria-hidden="true">mdi-close</v-icon>
           </v-btn>
         </div>
       </v-tab>
 
       <!-- タイマー追加タブ -->
-      <v-tab @click="handleAddTimer" class="add-timer-tab">
-        <v-icon>mdi-plus</v-icon>
+      <v-tab
+        @click="handleAddTimer"
+        class="add-timer-tab"
+        aria-label="新しいタイマーを追加"
+      >
+        <v-icon aria-hidden="true">mdi-plus</v-icon>
         <span class="ml-1">追加</span>
       </v-tab>
     </v-tabs>

@@ -11,19 +11,23 @@
               </v-icon>
               Timer
             </h1>
-            <!-- キーボードショートカットヘルプボタン -->
-            <v-btn
-              icon
-              variant="text"
-              size="small"
-              class="keyboard-help-btn"
-              @click="toggleHelp"
-            >
-              <v-icon>mdi-keyboard</v-icon>
-              <v-tooltip activator="parent" location="bottom">
-                キーボードショートカット (?)
-              </v-tooltip>
-            </v-btn>
+            <div class="header-actions">
+              <!-- テーマ切り替えボタン -->
+              <ThemeToggle />
+              <!-- キーボードショートカットヘルプボタン -->
+              <v-btn
+                icon
+                variant="text"
+                size="small"
+                class="keyboard-help-btn"
+                @click="toggleHelp"
+              >
+                <v-icon>mdi-keyboard</v-icon>
+                <v-tooltip activator="parent" location="bottom">
+                  キーボードショートカット (?)
+                </v-tooltip>
+              </v-btn>
+            </div>
           </div>
           <p class="text-subtitle-1 text-medium-emphasis mt-2">
             シンプルで使いやすいタイマーアプリ
@@ -56,7 +60,7 @@
 
           <v-divider class="my-6" />
 
-          <!-- 設定（展開可能） -->
+          <!-- 設定と履歴（展開可能） -->
           <v-expansion-panels variant="accordion">
             <v-expansion-panel>
               <v-expansion-panel-title>
@@ -65,6 +69,16 @@
               </v-expansion-panel-title>
               <v-expansion-panel-text>
                 <SettingsPanel />
+              </v-expansion-panel-text>
+            </v-expansion-panel>
+
+            <v-expansion-panel>
+              <v-expansion-panel-title>
+                <v-icon class="mr-2">mdi-history</v-icon>
+                履歴
+              </v-expansion-panel-title>
+              <v-expansion-panel-text>
+                <TimerHistory />
               </v-expansion-panel-text>
             </v-expansion-panel>
           </v-expansion-panels>
@@ -107,12 +121,20 @@ useHead({
 const { loadSettings } = useTimerSettings()
 const { loadTimers } = useTimers()
 
+// テーマ管理
+const { initTheme } = useTheme()
+
+// タイマー履歴
+const { loadHistory } = useTimerHistory()
+
 // キーボードショートカットを有効化
 const { toggleHelp } = useKeyboardShortcuts()
 
 onMounted(() => {
   loadSettings()
   loadTimers()
+  loadHistory()
+  initTheme()
 })
 </script>
 
@@ -134,6 +156,12 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   gap: 12px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .keyboard-help-btn {

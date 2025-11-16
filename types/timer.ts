@@ -16,3 +16,13 @@ export interface Timer {
   state: TimerState
   intervalId?: ReturnType<typeof setInterval> | null
 }
+
+export interface TimerHistoryEntry {
+  id: string
+  label: string
+  mode: 'countdown' | 'countup'
+  duration: number // 実際に経過した秒数
+  targetDuration?: number // カウントダウンの場合の目標時間
+  completedAt: Date
+  completed: boolean // 正常に完了したか（カウントダウンで0になったか）
+}

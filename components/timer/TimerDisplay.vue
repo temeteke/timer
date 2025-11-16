@@ -2,20 +2,29 @@
   <v-card class="timer-display" elevation="0">
     <v-card-text class="text-center pa-8">
       <!-- 円形プログレスバー -->
-      <div class="progress-wrapper">
+      <div
+        ref="swipeArea"
+        class="progress-wrapper"
+        role="region"
+        aria-label="タイマー表示エリア"
+      >
         <v-progress-circular
           :model-value="progress"
           :size="280"
           :width="12"
           :color="timerColor"
           class="timer-progress"
+          :aria-valuenow="progress"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          role="progressbar"
         >
           <!-- 時間表示 -->
           <div class="time-display">
-            <div class="time-text">
+            <div class="time-text" aria-live="polite" aria-atomic="true">
               {{ formattedTime }}
             </div>
-            <div class="mode-text">
+            <div class="mode-text" aria-label="タイマーモード">
               {{ modeLabel }}
             </div>
           </div>
@@ -23,12 +32,13 @@
       </div>
 
       <!-- ステータス表示 -->
-      <div class="status-text mt-6">
+      <div class="status-text mt-6" role="status" aria-live="polite">
         <v-chip
           v-if="state.isRunning"
           color="success"
           variant="flat"
           prepend-icon="mdi-play"
+          aria-label="タイマー実行中"
         >
           実行中
         </v-chip>
@@ -37,6 +47,7 @@
           color="warning"
           variant="flat"
           prepend-icon="mdi-pause"
+          aria-label="タイマー一時停止中"
         >
           一時停止
         </v-chip>
@@ -45,6 +56,7 @@
           color="default"
           variant="flat"
           prepend-icon="mdi-timer-outline"
+          aria-label="タイマー待機中"
         >
           待機中
         </v-chip>
@@ -54,7 +66,7 @@
 </template>
 
 <script setup lang="ts">
-const { activeTimer, getFormattedTime, getProgress } = useTimers()
+const { activeTimer, getFormattedTime, getProgress, nextTimer, prevTimer } = useTimers()
 
 // アクティブなタイマーの状態
 const state = computed(() => activeTimer.value?.state)
@@ -87,6 +99,20 @@ const modeLabel = computed(() => {
   if (!state.value) return ''
   return state.value.mode === 'countdown' ? 'カウントダウン' : 'カウントアップ'
 })
+
+// スワイプジェスチャー対応
+const swipeArea = ref<HTMLElement | null>(null)
+const { onSwipeLeft, onSwipeRight } = useSwipe(swipeArea)
+
+// 左スワイプで次のタイマーへ
+onSwipeLeft.value = () => {
+  nextTimer()
+}
+
+// 右スワイプで前のタイマーへ
+onSwipeRight.value = () => {
+  prevTimer()
+}
 </script>
 
 <style scoped>
