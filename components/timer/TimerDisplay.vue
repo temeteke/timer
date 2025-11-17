@@ -3,7 +3,6 @@
     <v-card-text class="text-center pa-8">
       <!-- 円形プログレスバー -->
       <div
-        ref="swipeArea"
         class="progress-wrapper"
         role="region"
         aria-label="タイマー表示エリア"
@@ -66,7 +65,7 @@
 </template>
 
 <script setup lang="ts">
-const { activeTimer, getFormattedTime, getProgress, nextTimer, prevTimer } = useTimers()
+const { activeTimer, getFormattedTime, getProgress } = useTimers()
 
 // アクティブなタイマーの状態
 const state = computed(() => activeTimer.value?.state)
@@ -99,20 +98,6 @@ const modeLabel = computed(() => {
   if (!state.value) return ''
   return state.value.mode === 'countdown' ? 'カウントダウン' : 'カウントアップ'
 })
-
-// スワイプジェスチャー対応
-const swipeArea = ref<HTMLElement | null>(null)
-const { onSwipeLeft, onSwipeRight } = useSwipe(swipeArea)
-
-// 左スワイプで次のタイマーへ
-onSwipeLeft.value = () => {
-  nextTimer()
-}
-
-// 右スワイプで前のタイマーへ
-onSwipeRight.value = () => {
-  prevTimer()
-}
 </script>
 
 <style scoped>
