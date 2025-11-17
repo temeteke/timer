@@ -81,30 +81,81 @@
         </v-col>
       </v-row>
 
-      <!-- 時間設定スライダー（カウントダウンモード時のみ） -->
+      <!-- 時間設定（電卓式入力）（カウントダウンモード時のみ） -->
       <v-row v-if="state.mode === 'countdown' && !state.isRunning" justify="center" class="mt-6">
         <v-col cols="12" sm="8" md="6">
           <div class="time-setter">
-            <div class="d-flex justify-space-between align-center mb-2">
-              <span class="text-subtitle-2">時間設定</span>
-              <span class="text-h6 font-weight-bold text-primary" aria-live="polite">
-                {{ formatTime(customTime) }}
-              </span>
+            <div class="time-input-header mb-4">
+              <div class="text-subtitle-2 text-center mb-2">時間設定</div>
+
+              <!-- 入力表示エリア -->
+              <div class="time-display-container">
+                <div class="time-display" aria-live="polite">
+                  {{ formattedTimeDisplay }}
+                </div>
+                <div class="time-input-hint text-caption text-medium-emphasis">
+                  {{ inputHint }}
+                </div>
+              </div>
             </div>
-            <v-slider
-              v-model="customTime"
-              :min="0"
-              :max="3600"
-              :step="60"
-              thumb-label="always"
-              color="primary"
-              @update:model-value="handleTimeChange"
-              aria-label="タイマー時間を設定"
-            >
-              <template #thumb-label="{ modelValue }">
-                {{ Math.floor(modelValue / 60) }}分
-              </template>
-            </v-slider>
+
+            <!-- テンキー -->
+            <div class="number-pad">
+              <v-row dense>
+                <v-col
+                  v-for="num in [1, 2, 3, 4, 5, 6, 7, 8, 9]"
+                  :key="num"
+                  cols="4"
+                >
+                  <v-btn
+                    block
+                    size="large"
+                    variant="outlined"
+                    color="primary"
+                    @click="inputNumber(num)"
+                    class="number-btn"
+                  >
+                    {{ num }}
+                  </v-btn>
+                </v-col>
+                <v-col cols="4">
+                  <v-btn
+                    block
+                    size="large"
+                    variant="outlined"
+                    color="error"
+                    @click="clearInput"
+                    class="number-btn"
+                  >
+                    <v-icon>mdi-backspace-outline</v-icon>
+                  </v-btn>
+                </v-col>
+                <v-col cols="4">
+                  <v-btn
+                    block
+                    size="large"
+                    variant="outlined"
+                    color="primary"
+                    @click="inputNumber(0)"
+                    class="number-btn"
+                  >
+                    0
+                  </v-btn>
+                </v-col>
+                <v-col cols="4">
+                  <v-btn
+                    block
+                    size="large"
+                    variant="outlined"
+                    color="warning"
+                    @click="deleteLastDigit"
+                    class="number-btn"
+                  >
+                    <v-icon>mdi-backspace</v-icon>
+                  </v-btn>
+                </v-col>
+              </v-row>
+            </div>
           </div>
         </v-col>
       </v-row>
@@ -118,8 +169,8 @@ const { activeTimer, start, pause, reset, setTime, setMode, formatTime } = useTi
 // アクティブなタイマーの状態
 const state = computed(() => activeTimer.value?.state)
 
-// カスタム時間設定用
-const customTime = ref(state.value?.totalSeconds || 300)
+// 電卓式入力用の数字列
+const inputDigits = ref('')
 
 // 開始ボタン
 const handleStart = () => {
@@ -139,27 +190,109 @@ const handleReset = () => {
 // モード変更
 const handleModeChange = (mode: 'countdown' | 'countup') => {
   setMode(mode)
-  if (mode === 'countdown' && customTime.value > 0) {
-    setTime(customTime.value)
+  if (mode === 'countdown') {
+    updateTimerFromInput()
   }
 }
 
-// 時間変更
-const handleTimeChange = (value: number) => {
-  setTime(value)
+// 数字を入力（最大6桁まで）
+const inputNumber = (num: number) => {
+  if (inputDigits.value.length < 6) {
+    inputDigits.value += num.toString()
+    updateTimerFromInput()
+  }
 }
+
+// 最後の1桁を削除
+const deleteLastDigit = () => {
+  if (inputDigits.value.length > 0) {
+    inputDigits.value = inputDigits.value.slice(0, -1)
+    updateTimerFromInput()
+  }
+}
+
+// 入力をクリア
+const clearInput = () => {
+  inputDigits.value = ''
+  setTime(0)
+}
+
+// 入力された数字列から秒数を計算
+const calculateSeconds = (digits: string): number => {
+  if (!digits) return 0
+
+  // 右から2桁ずつ秒、分、時として解釈
+  const padded = digits.padStart(6, '0')
+  const hours = parseInt(padded.slice(0, 2))
+  const minutes = parseInt(padded.slice(2, 4))
+  const seconds = parseInt(padded.slice(4, 6))
+
+  return hours * 3600 + minutes * 60 + seconds
+}
+
+// 入力からタイマーを更新
+const updateTimerFromInput = () => {
+  const totalSeconds = calculateSeconds(inputDigits.value)
+  setTime(totalSeconds)
+}
+
+// フォーマットされた時間表示（HH:MM:SS）
+const formattedTimeDisplay = computed(() => {
+  if (!inputDigits.value) return '00:00:00'
+
+  const padded = inputDigits.value.padStart(6, '0')
+  const hours = padded.slice(0, 2)
+  const minutes = padded.slice(2, 4)
+  const seconds = padded.slice(4, 6)
+
+  return `${hours}:${minutes}:${seconds}`
+})
+
+// 入力ヒント
+const inputHint = computed(() => {
+  if (!inputDigits.value) return '数字を入力してください（例: 1030 → 10分30秒）'
+
+  const totalSeconds = calculateSeconds(inputDigits.value)
+  if (totalSeconds === 0) return '時間を設定してください'
+
+  const parts = []
+  const hours = Math.floor(totalSeconds / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const seconds = totalSeconds % 60
+
+  if (hours > 0) parts.push(`${hours}時間`)
+  if (minutes > 0) parts.push(`${minutes}分`)
+  if (seconds > 0) parts.push(`${seconds}秒`)
+
+  return parts.join(' ')
+})
 
 // 初期時間設定
 onMounted(() => {
-  if (state.value && state.value.mode === 'countdown' && state.value.totalSeconds === 0) {
-    setTime(customTime.value)
+  // タイマーの現在時間から入力を初期化
+  if (state.value && state.value.totalSeconds > 0) {
+    const total = state.value.totalSeconds
+    const hours = Math.floor(total / 3600)
+    const minutes = Math.floor((total % 3600) / 60)
+    const seconds = total % 60
+
+    inputDigits.value = `${hours.toString().padStart(2, '0')}${minutes.toString().padStart(2, '0')}${seconds.toString().padStart(2, '0')}`.replace(/^0+/, '') || '0'
+  } else if (state.value && state.value.mode === 'countdown') {
+    // デフォルトは5分
+    inputDigits.value = '500'
+    updateTimerFromInput()
   }
 })
 
-// タイマー状態が変わったらカスタム時間を更新
+// タイマー状態が外部から変わったら入力を更新（プリセット選択時など）
 watch(() => state.value?.totalSeconds, (newVal) => {
-  if (newVal && newVal > 0 && state.value && !state.value.isRunning) {
-    customTime.value = newVal
+  if (newVal && newVal > 0 && state.value && !state.value.isRunning && !state.value.isPaused) {
+    const total = newVal
+    const hours = Math.floor(total / 3600)
+    const minutes = Math.floor((total % 3600) / 60)
+    const seconds = total % 60
+
+    inputDigits.value = `${hours.toString().padStart(2, '0')}${minutes.toString().padStart(2, '0')}${seconds.toString().padStart(2, '0')}`.replace(/^0+/, '') || '0'
   }
 })
 </script>
@@ -174,9 +307,49 @@ watch(() => state.value?.totalSeconds, (newVal) => {
 }
 
 .time-setter {
-  padding: 16px;
+  padding: 20px;
   border-radius: 12px;
   background-color: rgba(var(--v-theme-surface-variant), 0.3);
+}
+
+.time-display-container {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.time-display {
+  font-size: 2.5rem;
+  font-weight: 700;
+  font-family: 'Roboto Mono', monospace;
+  color: rgb(var(--v-theme-primary));
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+  padding: 16px;
+  background-color: rgba(var(--v-theme-surface), 0.5);
+  border-radius: 8px;
+  border: 2px solid rgba(var(--v-theme-primary), 0.3);
+}
+
+.time-input-hint {
+  min-height: 20px;
+  font-size: 0.875rem;
+}
+
+.number-pad {
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.number-btn {
+  height: 60px;
+  font-size: 1.5rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.number-btn:active {
+  transform: scale(0.95);
 }
 
 .w-100 {
@@ -188,6 +361,16 @@ watch(() => state.value?.totalSeconds, (newVal) => {
   .control-btn {
     min-width: 120px;
     font-size: 0.875rem;
+  }
+
+  .time-display {
+    font-size: 2rem;
+    padding: 12px;
+  }
+
+  .number-btn {
+    height: 50px;
+    font-size: 1.25rem;
   }
 }
 </style>
