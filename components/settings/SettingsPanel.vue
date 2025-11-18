@@ -94,6 +94,19 @@
             サウンドをテスト
           </v-btn>
         </v-list-item>
+
+        <v-list-item>
+          <v-btn
+            block
+            color="primary"
+            variant="outlined"
+            prepend-icon="mdi-bell-ring"
+            :disabled="!permissionGranted"
+            @click="handleTestNotification"
+          >
+            通知をテスト
+          </v-btn>
+        </v-list-item>
       </v-list>
 
       <!-- PWA情報 -->
@@ -115,7 +128,7 @@
 
 <script setup lang="ts">
 const { settings, toggleSound, toggleVibration, saveSettings } = useTimerSettings()
-const { permissionGranted, requestPermission } = useNotification()
+const { permissionGranted, requestPermission, notifyTimerComplete } = useNotification()
 const { playSound } = useSound()
 
 // 通知の切り替え
@@ -138,6 +151,11 @@ const handleRequestPermission = async () => {
 // サウンドテスト
 const handleTestSound = async () => {
   await playSound()
+}
+
+// 通知テスト
+const handleTestNotification = () => {
+  notifyTimerComplete('これはテスト通知です')
 }
 </script>
 
