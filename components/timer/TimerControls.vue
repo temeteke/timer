@@ -401,7 +401,7 @@ watch(() => state.value?.totalSeconds, (newVal) => {
 .time-setter {
   padding: 20px;
   border-radius: 12px;
-  background-color: rgba(var(--v-theme-surface-variant), 0.3);
+  background-color: rgba(var(--v-theme-surface-variant), 0.5);
 }
 
 .time-display-container {
@@ -417,9 +417,10 @@ watch(() => state.value?.totalSeconds, (newVal) => {
   letter-spacing: 0.1em;
   margin-bottom: 8px;
   padding: 16px;
-  background-color: rgba(var(--v-theme-surface), 0.95);
+  background-color: rgb(var(--v-theme-surface));
   border-radius: 8px;
-  border: 2px solid rgba(var(--v-theme-primary), 0.3);
+  border: 2px solid rgba(var(--v-theme-primary), 0.5);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .time-input-hint {
