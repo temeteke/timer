@@ -3,8 +3,19 @@
  * Notification APIを使用してタイマー完了時に通知
  */
 
-export const useNotification = () => {
+import type { INotificationService } from '~/services/NotificationService'
+import { BrowserNotificationService } from '~/services/NotificationService'
+
+export const useNotification = (
+  notificationService?: INotificationService
+) => {
   const { settings } = useTimerSettings()
+
+  // サービスが提供されていない場合は、デフォルトのブラウザ実装を使用
+  const service = notificationService || (process.client ? new BrowserNotificationService(
+    () => settings.value.soundEnabled,
+    () => settings.value.vibrationEnabled
+  ) : null)
 
   // 通知の許可状態
   const permissionGranted = ref(false)
@@ -13,77 +24,20 @@ export const useNotification = () => {
    * 通知の許可をリクエスト
    */
   const requestPermission = async () => {
-    if (!process.client) return false
+    if (!process.client || !service) return false
 
-    // Notification APIが利用可能かチェック
-    if (!('Notification' in window)) {
-      console.warn('This browser does not support notifications')
-      return false
-    }
-
-    // 既に許可されている場合
-    if (Notification.permission === 'granted') {
-      permissionGranted.value = true
-      return true
-    }
-
-    // 拒否されている場合
-    if (Notification.permission === 'denied') {
-      permissionGranted.value = false
-      return false
-    }
-
-    // 許可をリクエスト
-    try {
-      const permission = await Notification.requestPermission()
-      permissionGranted.value = permission === 'granted'
-      return permissionGranted.value
-    } catch (error) {
-      console.error('Failed to request notification permission:', error)
-      return false
-    }
+    const granted = await service.requestPermission()
+    permissionGranted.value = granted
+    return granted
   }
 
   /**
    * 通知を送信
    */
   const sendNotification = (title: string, options?: NotificationOptions) => {
-    if (!process.client) return
+    if (!process.client || !service) return
 
-    // 通知が無効の場合は送信しない
-    if (!settings.value.soundEnabled) return
-
-    // 通知の許可がない場合
-    if (Notification.permission !== 'granted') {
-      console.warn('Notification permission not granted')
-      return
-    }
-
-    try {
-      const defaultOptions: NotificationOptions = {
-        icon: '/timer/icon-192x192.png',
-        badge: '/timer/icon-192x192.png',
-        vibrate: settings.value.vibrationEnabled ? [200, 100, 200] : undefined,
-        requireInteraction: true,
-        tag: 'timer-complete',
-        ...options
-      }
-
-      const notification = new Notification(title, defaultOptions)
-
-      // 通知をクリックした時の処理
-      notification.onclick = () => {
-        window.focus()
-        notification.close()
-      }
-
-      // 一定時間後に自動で閉じる
-      setTimeout(() => {
-        notification.close()
-      }, 10000)
-    } catch (error) {
-      console.error('Failed to send notification:', error)
-    }
+    service.sendNotification(title, options)
   }
 
   /**
@@ -100,11 +54,9 @@ export const useNotification = () => {
    * 初期化時に許可状態をチェック
    */
   const checkPermission = () => {
-    if (!process.client) return
+    if (!process.client || !service) return
 
-    if ('Notification' in window) {
-      permissionGranted.value = Notification.permission === 'granted'
-    }
+    permissionGranted.value = service.isPermissionGranted()
   }
 
   // クライアント側でマウント時にチェック
