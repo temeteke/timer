@@ -417,7 +417,7 @@ watch(() => state.value?.totalSeconds, (newVal) => {
   letter-spacing: 0.1em;
   margin-bottom: 8px;
   padding: 16px;
-  background-color: rgba(var(--v-theme-surface), 0.5);
+  background-color: rgba(var(--v-theme-surface), 0.95);
   border-radius: 8px;
   border: 2px solid rgba(var(--v-theme-primary), 0.3);
 }
