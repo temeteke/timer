@@ -50,13 +50,6 @@
           <TimerControls />
         </v-card>
 
-        <!-- プリセットカード -->
-        <v-card elevation="4" class="main-card mb-6">
-          <v-card-text class="pa-4">
-            <TimerPresets />
-          </v-card-text>
-        </v-card>
-
         <!-- 設定と履歴 -->
         <v-card elevation="4" class="main-card">
           <v-expansion-panels variant="accordion">

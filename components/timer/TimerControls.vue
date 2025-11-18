@@ -81,12 +81,48 @@
         </v-col>
       </v-row>
 
-      <!-- 時間設定（電卓式入力）（カウントダウンモード時のみ） -->
+      <!-- 時間設定（カウントダウンモード時のみ） -->
       <v-row v-if="state.mode === 'countdown' && !state.isRunning" justify="center" class="mt-6">
-        <v-col cols="12" sm="8" md="6">
+        <v-col cols="12" sm="10" md="8">
+          <!-- クイック設定（プリセット） -->
+          <div class="presets-section mb-6">
+            <div class="text-subtitle-2 text-center mb-3">クイック設定</div>
+            <v-row role="group" aria-label="プリセット時間選択">
+              <v-col
+                v-for="preset in settings.presets"
+                :key="preset"
+                cols="6"
+                sm="3"
+              >
+                <v-card
+                  class="preset-card"
+                  :class="{ 'active-preset': isActivePreset(preset) }"
+                  :elevation="isActivePreset(preset) ? 8 : 2"
+                  @click="handlePresetClick(preset)"
+                  :aria-label="`タイマーを${formatPresetTime(preset)}に設定`"
+                  role="button"
+                  tabindex="0"
+                  @keyup.enter="handlePresetClick(preset)"
+                >
+                  <v-card-text class="pa-3 text-center">
+                    <div class="preset-icon mb-1">
+                      <v-icon size="28" :color="isActivePreset(preset) ? 'primary' : 'default'">
+                        {{ getPresetIcon(preset) }}
+                      </v-icon>
+                    </div>
+                    <div class="preset-time">
+                      {{ formatPresetTime(preset) }}
+                    </div>
+                  </v-card-text>
+                </v-card>
+              </v-col>
+            </v-row>
+          </div>
+
+          <!-- 電卓式入力 -->
           <div class="time-setter">
             <div class="time-input-header mb-4">
-              <div class="text-subtitle-2 text-center mb-2">時間設定</div>
+              <div class="text-subtitle-2 text-center mb-2">詳細設定</div>
 
               <!-- 入力表示エリア -->
               <div class="time-display-container">
@@ -165,12 +201,31 @@
 
 <script setup lang="ts">
 const { activeTimer, start, pause, reset, setTime, setMode, formatTime } = useTimers()
+const { settings, formatPresetTime } = useTimerSettings()
 
 // アクティブなタイマーの状態
 const state = computed(() => activeTimer.value?.state)
 
 // 電卓式入力用の数字列
 const inputDigits = ref('')
+
+// プリセット関連の関数
+const isActivePreset = (preset: number) => {
+  return state.value?.totalSeconds === preset && state.value?.mode === 'countdown'
+}
+
+const getPresetIcon = (seconds: number) => {
+  if (seconds <= 60) return 'mdi-clock-fast'
+  if (seconds <= 300) return 'mdi-clock-outline'
+  if (seconds <= 900) return 'mdi-clock-time-four-outline'
+  if (seconds <= 1800) return 'mdi-clock-time-eight-outline'
+  return 'mdi-clock-time-twelve-outline'
+}
+
+const handlePresetClick = (seconds: number) => {
+  // プリセット時間を設定
+  setTime(seconds)
+}
 
 // 開始ボタン
 const handleStart = () => {
@@ -304,6 +359,43 @@ watch(() => state.value?.totalSeconds, (newVal) => {
 
 .gap-3 {
   gap: 12px;
+}
+
+.presets-section {
+  margin-bottom: 24px;
+}
+
+.preset-card {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 12px;
+  min-height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preset-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.active-preset {
+  border: 2px solid rgb(var(--v-theme-primary));
+  background: rgba(var(--v-theme-primary), 0.05);
+}
+
+.preset-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.preset-time {
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: rgba(var(--v-theme-on-surface), 0.87);
 }
 
 .time-setter {
