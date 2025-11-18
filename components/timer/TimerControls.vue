@@ -38,13 +38,13 @@
 
           <!-- リセットボタン -->
           <v-btn
-            color="secondary"
+            color="error"
             size="x-large"
             :disabled="!state.isRunning && !state.isPaused"
             @click="handleReset"
             class="control-btn"
             rounded
-            variant="outlined"
+            variant="tonal"
             aria-label="タイマーをリセット"
           >
             <v-icon size="large" class="mr-2">
