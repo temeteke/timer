@@ -9,7 +9,7 @@
               <v-icon size="large" color="primary" class="mr-2">
                 mdi-timer-outline
               </v-icon>
-              Timer
+              <NuxtLink to="/" class="app-title-link">Timer</NuxtLink>
             </h1>
             <div class="header-actions">
               <!-- テーマ切り替えボタン -->
@@ -110,7 +110,7 @@ useHead({
 
 // 設定とタイマーを読み込み
 const { loadSettings } = useTimerSettings()
-const { loadTimer } = useTimers()
+const { loadTimer, setTime, setMode, timer } = useTimers()
 
 // テーマ管理
 const { initTheme } = useTheme()
@@ -121,12 +121,69 @@ const { loadHistory } = useTimerHistory()
 // キーボードショートカットを有効化
 const { toggleHelp } = useKeyboardShortcuts()
 
+// ルーター
+const route = useRoute()
+const router = useRouter()
+
+/**
+ * URLクエリパラメータからタイマー状態を読み込む
+ */
+const loadFromQueryParams = () => {
+  const mode = route.query.mode as string
+  const time = route.query.time as string
+
+  if (mode === 'countdown' || mode === 'countup') {
+    setMode(mode)
+  }
+
+  if (time && !isNaN(Number(time))) {
+    const seconds = Number(time)
+    if (seconds > 0) {
+      setTime(seconds)
+    }
+  }
+}
+
+/**
+ * タイマー状態をURLクエリパラメータに同期
+ */
+const syncToQueryParams = () => {
+  if (!timer.value) return
+
+  const query: Record<string, string> = {}
+
+  if (timer.value.state.mode) {
+    query.mode = timer.value.state.mode
+  }
+
+  if (timer.value.state.mode === 'countdown' && timer.value.state.totalSeconds > 0) {
+    query.time = timer.value.state.totalSeconds.toString()
+  }
+
+  // URLを更新（リロードなし）
+  router.replace({ query })
+}
+
 onMounted(() => {
   loadSettings()
   loadTimer()
   loadHistory()
   initTheme()
+
+  // URLクエリパラメータから読み込み（localStorageより優先）
+  if (route.query.mode || route.query.time) {
+    loadFromQueryParams()
+  }
 })
+
+// タイマー状態が変わったらURLを同期
+watch(
+  () => timer.value?.state,
+  () => {
+    syncToQueryParams()
+  },
+  { deep: true }
+)
 </script>
 
 <style scoped>
@@ -162,6 +219,16 @@ onMounted(() => {
 
 .keyboard-help-btn:hover {
   opacity: 1;
+}
+
+.app-title-link {
+  color: inherit;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.app-title-link:hover {
+  opacity: 0.8;
 }
 
 .main-card {
