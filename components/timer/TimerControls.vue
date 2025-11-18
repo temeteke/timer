@@ -401,7 +401,8 @@ watch(() => state.value?.totalSeconds, (newVal) => {
 .time-setter {
   padding: 20px;
   border-radius: 12px;
-  background-color: rgba(var(--v-theme-surface-variant), 0.5);
+  background-color: transparent;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
 }
 
 .time-display-container {
