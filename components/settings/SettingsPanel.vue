@@ -108,20 +108,6 @@
           </v-btn>
         </v-list-item>
       </v-list>
-
-      <!-- PWA情報 -->
-      <v-alert
-        class="mt-4"
-        type="info"
-        variant="tonal"
-        density="compact"
-        icon="mdi-information"
-      >
-        <div class="text-caption">
-          <strong>PWA対応：</strong>
-          このアプリはホーム画面に追加してオフラインで使用できます
-        </div>
-      </v-alert>
     </v-card-text>
   </v-card>
 </template>
